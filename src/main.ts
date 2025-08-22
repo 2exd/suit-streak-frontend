@@ -1,32 +1,22 @@
-import { createApp } from 'vue'
-import './styles/app.css'
+import {createApp} from "vue"
+// import "./styles/app.css"
 
-import './styles/tailwind.css'
-import router from "./router/index.ts";
-import App from "./App.vue";
+import router from "./router/index.ts"
+import store from "@/store"
+import App from "./App.vue"
+
+// 导入全局样式
+import '@/styles/global.scss';
 
 // svg-icon
-import 'virtual:svg-icons-register'
-
-
-// markdown
-import Markdown from 'vue3-markdown-it';
-import MarkdownIt from 'markdown-it';
-import markdownItKatex from 'markdown-it-katex';
-import 'katex/dist/katex.min.css';
+// import 'virtual:svg-icons-register'
+//? vant
+import "vant/lib/index.css"
 
 
 const app = createApp(App)
 
-
-// 配置 markdown-it 实例以支持公式渲染
-const md = new MarkdownIt().use(markdownItKatex);
-
-app.use(Markdown, {
-    markdownIt: md
-});
-
-
+app.use(store)
 app.use(router)
 
-app.mount('#app')
+app.mount("#app")

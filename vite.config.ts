@@ -6,11 +6,23 @@ import pxtovw from "postcss-px-to-viewport"
 import createVitePlugins from "./vite/plugins"
 
 
-const loder_pxtovw = pxtovw({
-    //这里是设计稿宽度 自己修改
-    viewportWidth: 1440,
-    viewportUnit: "vw",
+// const loder_pxtovw = pxtovw({
+//     //这里是设计稿宽度 自己修改
+//     viewportWidth: 1440,
+//     viewportUnit: "vw",
+// })
+
+// 配置px转vw（适配移动端横屏）
+const loader_pxtovw = pxtovw({
+    viewportWidth: 1080, // 横屏设计稿宽度
+    viewportHeight: 640, // 横屏设计稿高度
+    unitPrecision: 3, // 转换精度
+    viewportUnit: "vw", // 转换单位
+    selectorBlackList: [".ignore", ".hairlines"], // 不转换的类
+    minPixelValue: 1, // 最小转换像素值
+    mediaQuery: false, // 不允许媒体查询中转换
 })
+
 
 // https://vite.dev/config/
 export default defineConfig(({mode, command}) => {
@@ -25,15 +37,16 @@ export default defineConfig(({mode, command}) => {
             postcss: {
                 plugins: [
                     tailwindcss,
-                    loder_pxtovw
+                    loader_pxtovw
                 ],
             },
             preprocessorOptions: {
                 scss: {
-                    additionalData: `@use "@/styles/theme.scss" as *;@use "@/styles/variables.scss" as *;`,
+                    additionalData: `@use "@/styles/theme.scss" as *;`,
                 },
             },
         },
+        devSourcemap: true,
         base: VITE_APP_ENV === "production" ? "/" : "/",
         resolve: {
             alias: {
