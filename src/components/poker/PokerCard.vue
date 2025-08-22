@@ -15,18 +15,18 @@
           :class="selected ? 'ring-2 ring-blue-500 ring-offset-1' : ''"
       >
         <!-- 左上角花色和数字 -->
-        <div class="flex flex-col items-start">
+        <div class="flex flex-col items-start select-none">
           <span :class="colorClass">{{ suitSymbol }}</span>
           <span :class="[colorClass, 'font-bold', 'text-sm']">{{ rankText }}</span>
         </div>
 
         <!-- 中间大花色 -->
-        <div v-if="!isJoker" class="flex-1 flex items-center justify-center">
+        <div v-if="!isJoker" class="flex-1 flex items-center justify-center select-none">
           <span :class="[colorClass, 'text-3xl md:text-4xl', 'font-light']">{{ suitSymbol }}</span>
         </div>
 
         <!-- 大王/小王 -->
-        <div v-if="isJoker" class="flex-1 flex flex-col items-center justify-center p-2 relative">
+        <div v-if="isJoker" class="flex-1 flex flex-col items-center justify-center p-2 relative select-none">
           <!-- 装饰背景 -->
           <div class="absolute inset-0 opacity-10">
             <div class="w-full h-full flex items-center justify-center">
@@ -49,7 +49,7 @@
         </div>
 
         <!-- 右下角花色和数字 (旋转180度) -->
-        <div class="flex flex-col items-start transform rotate-180">
+        <div class="flex flex-col items-start transform rotate-180 select-none">
           <span :class="colorClass">{{ suitSymbol }}</span>
           <span :class="[colorClass, 'font-bold', 'text-sm']">{{ rankText }}</span>
         </div>
@@ -68,7 +68,7 @@
         </div>
 
         <!-- 中心图案 -->
-        <div class="absolute inset-0 flex items-center justify-center">
+        <div class="absolute inset-0 flex items-center justify-center select-none">
           <div class="w-1/2 h-1/2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex items-center justify-center">
             <div class="w-3/4 h-3/4 relative">
               <div class="absolute inset-0 border-2 border-white/30 rounded-full"></div>
@@ -151,6 +151,8 @@ const jokerColorClass = computed(() => {
 <style scoped>
 .poker-card {
   perspective: 1200px;
+  user-select: none; /* 禁止选择卡片本身 */
+  -webkit-user-select: none; /* Safari 浏览器兼容 */
 }
 
 .backface-hidden {
@@ -182,5 +184,13 @@ const jokerColorClass = computed(() => {
 /* 确保Font Awesome图标正确显示 */
 :deep(.fa-joker) {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* 禁止文本选择的工具类 */
+.select-none {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 </style>

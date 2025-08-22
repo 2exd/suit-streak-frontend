@@ -103,7 +103,16 @@ export const routes = [
                     title: '扑克',
                     requiresAuth: true
                 },
-            }
+            },
+            {
+                path: 'table',
+                name: 'Table',
+                component: () => import('@/views/PokerTable/index.vue'),
+                meta: {
+                    title: '扑克桌',
+                    requiresAuth: true
+                },
+            },
         ]
     }
 ];
