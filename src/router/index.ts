@@ -51,34 +51,52 @@ export const routes = [
         name: 'login',
         component: () => import('@/views/Login/index.vue'),
     },
-    // 布局容器路由（所有需要布局的页面作为其子路由）
     {
-        path: '/',
-        component: Layout,
+        path: '/lobby',
+        name: 'Lobby',
+        component: () => import('@/views/Lobby/index.vue'),
         meta: {
-            layout: true
+            title: '游戏大厅',
+            requiresAuth: true
         },
-        children: [
-            {
-                path: 'lobby',
-                name: 'Lobby',
-                component: () => import('@/views/Lobby/index.vue'),
-                meta: {
-                    title: '游戏大厅',
-                    requiresAuth: true
-                },
-            },
-            {
-                path: 'room',
-                name: 'Room',
-                component: () => import('@/views/Room/index.vue'),
-                meta: {
-                    title: '游戏房间',
-                    requiresAuth: true
-                },
-            }
-        ]
-    }
+    },
+    {
+        path: '/room',
+        name: 'Room',
+        component: () => import('@/views/Room/index.vue'),
+        meta: {
+            title: '游戏房间',
+            requiresAuth: true
+        },
+    },
+    // 布局容器路由（所有需要布局的页面作为其子路由）
+    // {
+    //     path: '/',
+    //     component: Layout,
+    //     meta: {
+    //         layout: true
+    //     },
+    //     children: [
+    //         {
+    //             path: 'lobby',
+    //             name: 'Lobby',
+    //             component: () => import('@/views/Lobby/index.vue'),
+    //             meta: {
+    //                 title: '游戏大厅',
+    //                 requiresAuth: true
+    //             },
+    //         },
+    //         {
+    //             path: 'room',
+    //             name: 'Room',
+    //             component: () => import('@/views/Room/index.vue'),
+    //             meta: {
+    //                 title: '游戏房间',
+    //                 requiresAuth: true
+    //             },
+    //         }
+    //     ]
+    // }
 ];
 
 

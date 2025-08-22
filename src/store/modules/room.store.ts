@@ -1,245 +1,164 @@
-import {defineStore} from "pinia"
-import {computed, ref} from "vue"
-import {v4 as uuidv4} from "uuid"
-import {useUserStore} from "@/store/modules/user.store.ts"
+import { defineStore } from 'pinia'
+import { useUserStore } from './user.store'
+import { v4 as uuidv4 } from 'uuid'
+import { ref,computed } from 'vue'
+
+// 玩家类型定义
+interface Player {
+    id: string // 用户唯一标识
+    name: string // 昵称
+    isReady: boolean // 准备状态
+}
 
 // 房间类型定义
 interface Room {
-    id: string; // 房间唯一ID
-    name: string; // 房间名称（可选）
-    status: "waiting" | "playing"; // 房间状态
-    maxPlayers: 4; // 固定4人房
-    currentPlayers: RoomPlayer[]; // 当前玩家列表
-    hostId: string; // 房主ID（第一位玩家）
+    id: string // 房间ID
+    name: string // 房间名称（可选）
+    host: string // 房主ID（第一个进入的玩家）
+    players: Player[] // 房间内玩家
+    maxPlayers: number // 最大玩家数（固定4人）
+    status: 'waiting' | 'playing' // 房间状态
 }
 
-// 房间内玩家类型定义
-interface RoomPlayer {
-    id: string; // 玩家唯一标识（可基于username生成）
-    username: string; // 玩家昵称
-    readyStatus: "preparing" | "ready"; // 准备状态
-}
-
-// 当前房间状态（玩家视角）
-interface CurrentRoomState {
-    isInRoom: boolean; // 是否在房间内
-    currentRoom: Room | null; // 当前所在房间
-    myPlayerId: string; // 自己的玩家ID
-}
-
-export const useRoomStore = defineStore(
-    "room",
-    () => {
-        const userStore = useUserStore()
-
-        // 状态：全局房间列表（所有可加入的房间）
-        const roomList = ref<Room[]>([])
-
-        // 状态：当前房间信息（玩家所在房间）
-        const currentRoomState = ref<CurrentRoomState>({
-            isInRoom: false,
-            currentRoom: null,
-            myPlayerId: "",
-        })
-
-        // 计算属性：当前房间内的自己
-        const myPlayerInfo = computed(() => {
-            if (!currentRoomState.value.currentRoom) return null
-            return currentRoomState.value.currentRoom.currentPlayers.find(
-                player => player.id === currentRoomState.value.myPlayerId
-            )
-        })
-
-        // 计算属性：当前房间是否所有玩家已准备
-        const isAllReady = computed(() => {
-            if (!currentRoomState.value.currentRoom) return false
-            return currentRoomState.value.currentRoom.currentPlayers.every(
-                player => player.readyStatus === "ready"
-            )
-        })
-
-        // 计算属性：自己是否是房主
-        const amIHost = computed(() => {
-            if (!currentRoomState.value.currentRoom) return false
-            return currentRoomState.value.currentRoom.hostId === currentRoomState.value.myPlayerId
-        })
-
-        // 行动：创建房间
-        const createRoom = (roomName?: string): Room => {
-            if (!userStore.isLoggedIn) {
-                throw new Error("请先设置用户名")
-            }
-
-            // 生成玩家ID（基于username+时间戳简单生成）
-            const myPlayerId = `${userStore.username}-${Date.now().toString().slice(-4)}`
-
-            // 创建房间
-            const newRoom: Room = {
-                id: uuidv4().slice(0, 6), // 简化房间ID为6位
-                name: roomName || `默认房间-${Date.now().toString().slice(-4)}`,
-                status: "waiting",
-                maxPlayers: 4,
-                currentPlayers: [
-                    {
-                        id: myPlayerId,
-                        username: userStore.username,
-                        readyStatus: "preparing",
-                    },
-                ],
-                hostId: myPlayerId, // 房主为创建者
-            }
-
-            // 更新状态
-            roomList.value.push(newRoom)
-            currentRoomState.value = {
-                isInRoom: true,
-                currentRoom: newRoom,
-                myPlayerId: myPlayerId,
-            }
-
-            // 预留：后端创建房间接口
-            // await api.createRoom(newRoom);
-
-            return newRoom
-        }
-
-        // 行动：加入房间
-        const joinRoom = (roomId: string) => {
-            if (!userStore.isLoggedIn) {
-                throw new Error("请先设置用户名")
-            }
-
-            const targetRoom = roomList.value.find(room => room.id === roomId)
-            if (!targetRoom) {
-                throw new Error("房间不存在或已关闭")
-            }
-
-            if (targetRoom.currentPlayers.length >= targetRoom.maxPlayers) {
-                throw new Error("房间已满")
-            }
-
-            // 生成自己的玩家ID
-            const myPlayerId = `${userStore.username}-${Date.now().toString().slice(-4)}`
-
-            // 检查是否已在房间内
-            const isAlreadyIn = targetRoom.currentPlayers.some(
-                player => player.username === userStore.username
-            )
-            if (isAlreadyIn) {
-                throw new Error("你已在该房间内")
-            }
-
-            // 添加玩家到房间
-            targetRoom.currentPlayers.push({
-                id: myPlayerId,
-                username: userStore.username,
-                readyStatus: "preparing",
-            })
-
-            // 更新当前房间状态
-            currentRoomState.value = {
-                isInRoom: true,
-                currentRoom: targetRoom,
-                myPlayerId: myPlayerId,
-            }
-
-            // 预留：后端加入房间接口
-            // await api.joinRoom(roomId, { username: userStore.username });
-        }
-
-        // 行动：切换准备状态
-        const toggleReadyStatus = () => {
-            if (!currentRoomState.value.currentRoom || !myPlayerInfo.value) return
-
-            // 切换自己的准备状态
-            myPlayerInfo.value.readyStatus = myPlayerInfo.value.readyStatus === "ready"
-                ? "preparing"
-                : "ready"
-
-            // 预留：同步到后端
-            // await api.updateReadyStatus(
-            //   currentRoomState.value.currentRoom.id,
-            //   myPlayerInfo.value.readyStatus
-            // );
-        }
-
-        // 行动：开始游戏（仅房主可调用）
-        const startGame = () => {
-            if (!amIHost.value || !isAllReady.value) return
-
-            if (currentRoomState.value.currentRoom) {
-                currentRoomState.value.currentRoom.status = "playing"
-                // 预留：后端开始游戏接口
-                // await api.startGame(currentRoomState.value.currentRoom.id);
-            }
-        }
-
-        // 行动：离开房间
-        const leaveRoom = () => {
-            if (!currentRoomState.value.currentRoom) return
-
-            const roomId = currentRoomState.value.currentRoom.id
-            const myId = currentRoomState.value.myPlayerId
-
-            // 更新房间列表（移除自己）
-            const roomIndex = roomList.value.findIndex(room => room.id === roomId)
-            if (roomIndex > -1) {
-                const updatedPlayers = roomList.value[roomIndex].currentPlayers.filter(
-                    player => player.id !== myId
-                )
-
-                // 如果房间为空则删除房间，否则更新玩家列表
-                if (updatedPlayers.length === 0) {
-                    roomList.value.splice(roomIndex, 1)
-                } else {
-                    roomList.value[roomIndex].currentPlayers = updatedPlayers
-                    // 如果房主离开，重新指定房主为第一位玩家
-                    if (roomList.value[roomIndex].hostId === myId) {
-                        roomList.value[roomIndex].hostId = updatedPlayers[0].id
-                    }
-                }
-            }
-
-            // 重置当前房间状态
-            currentRoomState.value = {
-                isInRoom: false,
-                currentRoom: null,
-                myPlayerId: "",
-            }
-
-            // 预留：后端离开房间接口
-            // await api.leaveRoom(roomId);
-        }
-
-        // 行动：刷新房间列表（模拟后端拉取）
-        const refreshRoomList = () => {
-            // 预留：从后端拉取最新房间列表
-            // const freshList = await api.getRoomList();
-            // roomList.value = freshList.filter(room => room.status === 'waiting');
-        }
-
-        // 初始化时刷新房间列表
-        refreshRoomList()
-
-        return {
-            roomList,
-            currentRoomState,
-            myPlayerInfo,
-            isAllReady,
-            amIHost,
-            createRoom,
-            joinRoom,
-            toggleReadyStatus,
-            startGame,
-            leaveRoom,
-            refreshRoomList,
-        }
-    },
-    {
-        // 可选：持久化当前房间状态（断线重连用）
-        persist: {
-            key: "suit-streak-room",
-            storage: localStorage,
+export const useRoomStore = defineStore('room', () => {
+    const userStore = useUserStore()
+    const rooms = ref<Room[]>([
+        // 预设测试房间
+        {
+            id: 'RM001',
+            name: '新手房',
+            host: 'user1',
+            players: [
+                { id: 'user1', name: '玩家1', isReady: false },
+                { id: 'user2', name: '玩家2', isReady: true },
+            ],
+            maxPlayers: 4,
+            status: 'waiting'
         },
+        {
+            id: 'RM002',
+            name: '高手挑战',
+            host: 'user3',
+            players: [
+                { id: 'user3', name: '高手', isReady: true },
+            ],
+            maxPlayers: 4,
+            status: 'waiting'
+        }
+    ])
+    const currentRoom = ref<Room | null>(null) // 当前所在房间
+
+    // 获取可加入的空闲房间
+    const availableRooms = computed(() => {
+        return rooms.value.filter(room =>
+            room.status === 'waiting' && room.players.length < room.maxPlayers
+        )
+    })
+
+    // 创建房间
+    const createRoom = (roomName?: string) => {
+        const userId = userStore.userId || uuidv4() // 假设userStore有userId
+        const newRoom: Room = {
+            id: `RM${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`, // 简单生成房间ID
+            name: roomName || `默认房间-${new Date().getSeconds()}`,
+            host: userId,
+            players: [{
+                id: userId,
+                name: userStore.username || `玩家${Math.floor(Math.random() * 100)}`,
+                isReady: false
+            }],
+            maxPlayers: 4,
+            status: 'waiting'
+        }
+        rooms.value.push(newRoom)
+        currentRoom.value = newRoom
+        return newRoom.id
     }
-)
+
+    // 加入房间
+    const joinRoom = (roomId: string) => {
+        const room = rooms.value.find(r => r.id === roomId)
+        if (!room) return { success: false, message: '房间不存在' }
+        if (room.players.length >= room.maxPlayers) return { success: false, message: '房间已满' }
+        if (room.status !== 'waiting') return { success: false, message: '房间正在游戏中' }
+
+        const userId = userStore.userId || uuidv4()
+        // 防止重复加入
+        if (room.players.some(p => p.id === userId)) {
+            currentRoom.value = room
+            return { success: true }
+        }
+
+        // 添加当前用户到房间
+        room.players.push({
+            id: userId,
+            name: userStore.username || `玩家${Math.floor(Math.random() * 100)}`,
+            isReady: false
+        })
+        currentRoom.value = room
+        return { success: true }
+    }
+
+    // 退出房间
+    const leaveRoom = () => {
+        if (!currentRoom.value) return
+
+        const userId = userStore.userId || ''
+        // 移除当前用户
+        currentRoom.value.players = currentRoom.value.players.filter(p => p.id !== userId)
+
+        // 如果房主退出，重新指定房主（取剩余第一个玩家）
+        if (currentRoom.value.host === userId) {
+            if (currentRoom.value.players.length > 0) {
+                currentRoom.value.host = currentRoom.value.players[0].id
+            } else {
+                // 房间空了，删除房间
+                rooms.value = rooms.value.filter(r => r.id !== currentRoom.value!.id)
+            }
+        }
+
+        currentRoom.value = null
+    }
+
+    // 更新准备状态
+    const toggleReadyStatus = () => {
+        if (!currentRoom.value) return
+        const userId = userStore.userId || ''
+        const player = currentRoom.value.players.find(p => p.id === userId)
+        if (player) {
+            player.isReady = !player.isReady
+        }
+    }
+
+    // 检查是否所有玩家都已准备
+    const isAllReady = computed(() => {
+        return currentRoom.value
+            ? currentRoom.value.players.length === currentRoom.value.maxPlayers
+            && currentRoom.value.players.every(p => p.isReady)
+            : false
+    })
+
+    // 开始游戏（仅房主可调用）
+    const startGame = () => {
+        if (!currentRoom.value) return false
+        const userId = userStore.userId || ''
+        if (currentRoom.value.host !== userId) return false // 非房主不可开始
+        if (!isAllReady.value) return false // 未全部准备
+
+        currentRoom.value.status = 'playing'
+        // 这里可以添加跳转游戏页面的逻辑
+        return true
+    }
+
+    return {
+        rooms,
+        currentRoom,
+        availableRooms,
+        createRoom,
+        joinRoom,
+        leaveRoom,
+        toggleReadyStatus,
+        isAllReady,
+        startGame
+    }
+})
