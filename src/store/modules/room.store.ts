@@ -122,12 +122,14 @@ export const useRoomStore = defineStore('room', () => {
 
     // 更新准备状态
     const toggleReadyStatus = () => {
+        console.log("currentRoom:", currentRoom.value)
         if (!currentRoom.value) return
         const userId = userStore.userId || ''
         const player = currentRoom.value.players.find(p => p.id === userId)
         if (player) {
             player.isReady = !player.isReady
         }
+        console.log('更新准备状态:', player)
     }
 
     // 检查是否所有玩家都已准备

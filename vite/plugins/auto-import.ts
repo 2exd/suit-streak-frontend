@@ -1,6 +1,6 @@
 import AutoImport from "unplugin-auto-import/vite"
-import {ElementPlusResolver} from "unplugin-vue-components/resolvers"
 import { VantResolver } from '@vant/auto-import-resolver';
+
 
 export default function createAutoImport() {
     return AutoImport({
@@ -9,21 +9,19 @@ export default function createAutoImport() {
             /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
             /\.vue$/,
             /\.vue\?vue/, // .vue
-            /\.md$/, // .md
-            "src/types/auto-imports.d.ts"
         ],
         // 自动导入的内容
         imports: [
             "vue",
+            "@vueuse/core",
             "vue-router",
             "pinia",
-            "@vueuse/core"
         ],
         // 配置文件生成位置，默认是根目录
         dts: "src/types/auto-imports.d.ts",
         resolvers: [
-            VantResolver(),
-            ElementPlusResolver(),
+            // VantResolver(),
+            // ElementPlusResolver(),
         ]
     })
 }
