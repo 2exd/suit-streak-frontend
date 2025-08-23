@@ -16,7 +16,7 @@
       >
         <!-- 左上角花色和数字 -->
         <div class="flex flex-col items-start select-none">
-          <span :class="colorClass">{{ suitSymbol }}</span>
+<!--          <span :class="colorClass">{{ suitSymbol }}</span>-->
           <span :class="[colorClass, 'font-bold', 'text-sm']">{{ rankText }}</span>
         </div>
 
@@ -50,7 +50,7 @@
 
         <!-- 右下角花色和数字 (旋转180度) -->
         <div class="flex flex-col items-start transform rotate-180 select-none">
-          <span :class="colorClass">{{ suitSymbol }}</span>
+<!--          <span :class="colorClass">{{ suitSymbol }}</span>-->
           <span :class="[colorClass, 'font-bold', 'text-sm']">{{ rankText }}</span>
         </div>
       </div>
