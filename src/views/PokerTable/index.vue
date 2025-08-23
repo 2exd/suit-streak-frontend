@@ -154,7 +154,7 @@ const ACTIVE_OFFSET = {
   adjacent: -15,
   neighbor: -5
 };
-const MIN_SWIPE_DISTANCE = 30;
+const MIN_SWIPE_DISTANCE = 40;
 const SUCCESS_PROBABILITY = 0.6;
 const PLAY_DISCARD_RATIO = 0.5;
 
@@ -232,13 +232,18 @@ const getDiscardCardOffsetX = (index: number) => {
 const getCardYOffset = (index: number) => {
   let baseOffset = pokerDeck.value[index].offsetY;
 
-  if (activeIndex.value === index && touchStartY.value !== null) {
-    baseOffset += currentSwipeDistance.value;
+  if (activeIndex.value === index) {
+    // 激活的卡片先应用主偏移
+    baseOffset += ACTIVE_OFFSET.main;
+
+    // 如果正在触摸滑动，再加上滑动距离
+    if (touchStartY.value !== null) {
+      baseOffset += currentSwipeDistance.value;
+    }
   } else if (activeIndex.value !== null) {
+    // 非激活卡片根据距离应用相邻偏移
     const distance = Math.abs(index - activeIndex.value);
-    if (distance === 0) {
-      baseOffset += ACTIVE_OFFSET.main;
-    } else if (distance === 1) {
+    if (distance === 1) {
       baseOffset += ACTIVE_OFFSET.adjacent;
     } else if (distance === 2) {
       baseOffset += ACTIVE_OFFSET.neighbor;
