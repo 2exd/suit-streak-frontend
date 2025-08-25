@@ -201,7 +201,7 @@ const initializeDeck = (cardCount: number, rotateAngle: number, mode: "horizonta
       id: generateId(suit, rank, i),
       suit,
       rank,
-      flipped: false,
+      flipped: true,
       discardFlipped: false,
       offsetX,
       offsetY,
