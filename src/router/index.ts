@@ -113,6 +113,15 @@ export const routes = [
                     requiresAuth: true
                 },
             },
+            {
+                path: 'test',
+                name: 'Test',
+                component: () => import('@/views/PokerTable/components/test.vue'),
+                meta: {
+                    title: 'test',
+                    requiresAuth: true
+                },
+            },
         ]
     }
 ];

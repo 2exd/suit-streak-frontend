@@ -1,32 +1,60 @@
 <template>
   <div
-      class="poker-card relative cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:-translate-y-1"
-      :style="{ width: props.width, height: props.height }"
-      @click="$emit('click')"
+    :style="{
+        width: props.width,
+         height: props.height,
+        transform: `rotate(${props.rotation}deg)`
+       }"
+    class="poker-card relative cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:-translate-y-1"
+    @click="$emit('click')"
   >
     <!-- 卡牌翻转容器 -->
     <div
-        class="absolute w-full h-full transition-transform duration-600 transform-style-3d"
-        :class="{ 'rotate-y-180': isFlipped }"
+      :class="{ 'rotate-y-180': isFlipped }"
+      class="absolute w-full h-full transition-transform duration-600 transform-style-3d"
     >
       <!-- 卡牌正面 -->
       <div
-          class="absolute w-full h-full backface-hidden bg-gradient-to-br from-white to-gray-100 rounded-xl border border-gray-200 shadow-md overflow-hidden flex flex-col p-2 justify-center"
-          :class="selected ? 'ring-2 ring-blue-500 ring-offset-1' : ''"
+        :class="selected ? 'ring-2 ring-blue-500 ring-offset-1' : ''"
+        class="absolute w-full h-full backface-hidden bg-gradient-to-br from-white to-gray-100 rounded-xl border border-gray-200 shadow-md overflow-hidden flex flex-col p-2 justify-center"
       >
         <!-- 左上角花色和数字 -->
-        <div class="flex flex-col items-start select-none">
-<!--          <span :class="colorClass">{{ suitSymbol }}</span>-->
-          <span :class="[colorClass, 'font-bold', 'text-sm']">{{ rankText }}</span>
+        <div class="flex select-none content-center justify-start items-center">
+          <!--          <span :class="[colorClass, 'font-bold', 'text-sm']">{{-->
+          <!--                                        suitSymbol-->
+          <!--                                    }}</span>-->
+          <span
+            :class="[colorClass, 'font-bold', 'text-sm']"
+          >{{
+              rankText
+           }}</span>
+          <span
+            v-if="props.showIcon"
+            :class="[colorClass]"
+            class="text-md ml-1"
+          >
+            {{
+              suitSymbol
+            }}
+                    </span>
+
         </div>
 
         <!-- 中间大花色 -->
-        <div v-if="!isJoker" class="flex-1 flex items-center justify-center select-none">
-          <span :class="[colorClass, 'text-3xl md:text-4xl', 'font-light']">{{ suitSymbol }}</span>
+        <div
+          v-if="!isJoker"
+          class="flex-1 flex items-center justify-center select-none"
+        >
+          <span :class="[colorClass, 'text-3xl md:text-4xl', 'font-light']">{{
+              suitSymbol
+                                                                            }}</span>
         </div>
 
         <!-- 大王/小王 -->
-        <div v-if="isJoker" class="flex-1 flex flex-col items-center justify-center p-2 relative select-none">
+        <div
+          v-if="isJoker"
+          class="flex-1 flex flex-col items-center justify-center p-2 relative select-none"
+        >
           <!-- 装饰背景 -->
           <div class="absolute inset-0 opacity-10">
             <div class="w-full h-full flex items-center justify-center">
@@ -36,7 +64,10 @@
 
           <!-- 大小王图标 -->
           <div :class="[jokerColorClass, 'text-4xl md:text-5xl' , 'font-extrabold', 'relative', 'z-10', 'transition-transform hover:scale-110 duration-300']">
-            <i class="fa fa-joker" aria-hidden="true"></i>
+            <i
+              aria-hidden="true"
+              class="fa fa-joker"
+            ></i>
           </div>
 
           <!-- 花色图标组合 -->
@@ -49,9 +80,24 @@
         </div>
 
         <!-- 右下角花色和数字 (旋转180度) -->
-        <div class="flex flex-col items-start transform rotate-180 select-none">
-<!--          <span :class="colorClass">{{ suitSymbol }}</span>-->
-          <span :class="[colorClass, 'font-bold', 'text-sm']">{{ rankText }}</span>
+        <div class="flex justify-start items-center transform rotate-180 select-none">
+          <!--          <span :class="colorClass">{{-->
+          <!--              suitSymbol-->
+          <!--                                    }}</span>-->
+          <span :class="[colorClass, 'font-bold', 'text-sm']">
+            {{
+              rankText
+            }}
+          </span>
+          <span
+            v-if="props.showIcon"
+            :class="[colorClass]"
+            class="text-md ml-1"
+          >
+            {{
+              suitSymbol
+            }}
+          </span>
         </div>
       </div>
 
@@ -63,7 +109,11 @@
         <!-- 装饰纹理 -->
         <div class="absolute inset-0 opacity-10">
           <div class="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
-            <div v-for="i in 9" :key="i" class="bg-white/30 rounded-sm"></div>
+            <div
+              v-for="i in 9"
+              :key="i"
+              class="bg-white/30 rounded-sm"
+            ></div>
           </div>
         </div>
 
@@ -85,14 +135,32 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed } from 'vue';
+<script
+  lang="ts"
+  setup
+>
+import {computed} from "vue"
 
 // 扑克牌花色类型
-type Suit = 'hearts' | 'diamonds' | 'spades' | 'clubs' | 'joker';
+type Suit = "hearts" | "diamonds" | "spades" | "clubs" | "joker";
 
 // 扑克牌点数类型
-type Rank = 'A' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | 'J' | 'Q' | 'K' | 'BJ' | 'RJ';
+type Rank =
+  "A"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | "10"
+  | "J"
+  | "Q"
+  | "K"
+  | "BJ"
+  | "RJ";
 
 interface Props {
   suit: Suit;
@@ -101,51 +169,60 @@ interface Props {
   width?: string;
   height?: string;
   selected?: boolean;
+  rotation?: number;
+  showIcon?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   flipped: false,
-  width: '80px',
-  height: '112px',
-  selected: false
-});
+  width: "80px",
+  height: "112px",
+  selected: false,
+  rotation: 0,
+  showIcon: false,
+})
 
 // 计算属性：是否翻转
-const isFlipped = computed(() => props.flipped);
+const isFlipped = computed(() => props.flipped)
 
 // 计算属性：是否为大小王
-const isJoker = computed(() => props.suit === 'joker');
+const isJoker = computed(() => props.suit === "joker")
 
 // 计算属性：花色符号
 const suitSymbol = computed(() => {
   switch (props.suit) {
-    case 'hearts': return '♥';
-    case 'diamonds': return '♦';
-    case 'spades': return '♠';
-    case 'clubs': return '♣';
-    default: return '';
+    case "hearts":
+      return "♥"
+    case "diamonds":
+      return "♦"
+    case "spades":
+      return "♠"
+    case "clubs":
+      return "♣"
+    default:
+      return ""
   }
-});
+})
 
 // 计算属性：点数文本（大小王显示缩写）
 const rankText = computed(() => {
-  if (props.rank === 'BJ') return '🤡';
-  if (props.rank === 'RJ') return '🤡';
-  return props.rank;
-});
+  if (props.rank === "BJ") return "🤡"
+  if (props.rank === "RJ") return "🤡"
+  return props.rank
+})
 
 // 计算属性：颜色类
 const colorClass = computed(() => {
-  if (props.suit === 'hearts' || props.suit === 'diamonds') {
-    return 'text-red-600';
+  if (props.suit === "hearts" || props.suit === "diamonds") {
+    return "text-red-600"
   }
-  return 'text-gray-800';
-});
+  return "text-gray-800"
+})
 
 // 计算属性：王的颜色类
 const jokerColorClass = computed(() => {
-  return props.rank === 'RJ' ? 'text-red-600' : 'text-gray-800';
-});
+  return props.rank === "RJ" ? "text-red-600" : "text-gray-800"
+})
 </script>
 
 <style scoped>
